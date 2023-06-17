@@ -15,8 +15,8 @@ add_action('admin_menu', 'click_collect_branches_add_custom_admin_menu');
 
 function click_collect_branches_add_custom_admin_menu() {
     add_menu_page(
-        'Click & Collect Branches', 
-        'Click & Collect Branches', 
+        __('Click & Collect Branches', 'click-collect-branches'), 
+        __('Click & Collect Branches', 'click-collect-branches'), 
         'manage_options', 
         'click-collect-branches', 
         'click_collect_branches_display_main_menu_content', 
@@ -26,8 +26,8 @@ function click_collect_branches_add_custom_admin_menu() {
     
     add_submenu_page(
         'click-collect-branches', 
-        'Branches', 
-        'Branches', 
+        __('Branches', 'click-collect-branches'), 
+        __('Branches', 'click-collect-branches'), 
         'manage_options', 
         'branches', 
         'click_collect_branches_display_branches_page'
@@ -38,7 +38,7 @@ function click_collect_branches_add_custom_admin_menu() {
 function click_collect_branches_display_main_menu_content() {
     // Display content for the main menu page here
     echo '<div class="wrap">';
-    echo '<h1>Main Menu Page Content</h1>';
+    echo '<h1>' . __('Main Menu Page Content', 'click-collect-branches') . '</h1>';
     echo '</div>';
 }
 
@@ -50,7 +50,7 @@ function click_collect_branches_display_branches_page() {
     }
     
     // Update branch information if form submitted
-    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         click_collect_branches_save_branch_information();
     }
 
@@ -66,27 +66,27 @@ function click_collect_branches_display_branches_page() {
             <table class="form-table" role="presentation">
                 <tbody>
                 <tr>
-                    <th scope="row"><label for="branch_name">Branch Name:</label></th>
+                    <th scope="row"><label for="branch_name"><?php _e('Branch Name', 'click-collect-branches'); ?>:</label></th>
                     <td><input name="branch_name" type="text" id="branch_name" class="regular-text"></td>
                 </tr>
                 <tr>
-                    <th scope="row"><label for="branch_address">Branch Address:</label></th>
+                    <th scope="row"><label for="branch_address"><?php _e('Branch Address', 'click-collect-branches'); ?>:</label></th>
                     <td><textarea name="branch_address" id="branch_address" class="regular-text"></textarea></td>
                 </tr>
                 </tbody>
             </table>
             <?php
-            submit_button('Add Branch');
+            submit_button(__('Add Branch', 'click-collect-branches'));
             ?>
         </form>
 
         <?php if (!empty($branches)) : ?>
-            <h2>Branches:</h2>
+            <h2><?php _e('Branches', 'click-collect-branches'); ?>:</h2>
             <table class="wp-list-table widefat fixed striped">
                 <thead>
                 <tr>
-                    <th>Branch Name</th>
-                    <th>Branch Address</th>
+                    <th><?php _e('Branch Name', 'click-collect-branches'); ?></th>
+                    <th><?php _e('Branch Address', 'click-collect-branches'); ?></th>
                 </tr>
                 </thead>
                 <tbody>
@@ -143,7 +143,7 @@ function click_collect_branches_display_pickup_locations_checkout($checkout) {
                 collectionDateField.closest('.form-row').addClass('validate-required');
             }
             if ($('#pickup-location-box').length === 0 && <?php echo json_encode(!empty($branches)); ?>) {
-                var pickupLocationBox = $('<p class="form-row form-row-wide validate-required" id="pickup_location_field" data-priority=""><label for="pickup_location" class="">Pickup Location<abbr class="required" title="required">*</abbr></label><select name="pickup_location" id="pickup_location" class="form-select" required><option value="">Select Pickup Location</option><?php foreach ($branches as $branch) { echo '<option value="' . esc_attr($branch['name']) . '">' . esc_html($branch['name']) . '</option>'; } ?></select></p>');
+                var pickupLocationBox = $('<p class="form-row form-row-wide validate-required" id="pickup_location_field" data-priority=""><label for="pickup_location" class=""><?php _e('Pickup Location', 'click-collect-branches'); ?><abbr class="required" title="required">*</abbr></label><select name="pickup_location" id="pickup_location" class="form-select" required><option value=""><?php _e('Select Pickup Location', 'click-collect-branches'); ?></option><?php foreach ($branches as $branch) { echo '<option value="' . esc_attr($branch['name']) . '">' . esc_html($branch['name']) . '</option>'; } ?></select></p>');
                 pickupLocationBox.insertBefore(collectionDateField.closest('.form-row'));
                 pickupLocationBox.find('select').addClass('form-row-wide');
             }
@@ -158,7 +158,7 @@ add_action('woocommerce_checkout_process', 'click_collect_branches_validate_pick
 
 function click_collect_branches_validate_pickup_location() {
     if (isset($_POST['pickup_location']) && empty($_POST['pickup_location'])) {
-        wc_add_notice(__('Please select a pickup location.'), 'error');
+        wc_add_notice(__('Please select a pickup location.', 'click-collect-branches'), 'error');
     }
 }
 
@@ -172,12 +172,12 @@ function click_collect_branches_display_pickup_location_order_received($order_id
     $branch_address = get_post_meta($order_id, 'Branch Address', true);
 
     if (!empty($pickup_location)) {
-        echo '<h2>Pickup Location:</h2>';
+        echo '<h2>' . __('Pickup Location', 'click-collect-branches') . ':</h2>';
         echo '<p>' . esc_html($pickup_location) . '</p>';
     }
 
     if (!empty($branch_address)) {
-        echo '<strong>Branch Address:</strong>';
+        echo '<strong>' . __('Branch Address', 'click-collect-branches') . ':</strong>';
         echo '<p>' . esc_html($branch_address) . '</p>';
     }
 }
@@ -217,8 +217,8 @@ function click_collect_branches_display_pickup_location_admin_order_meta($order)
     $branch_address = $order->get_meta('Branch Address');
 
     if (!empty($pickup_location)) {
-        echo '<p><strong>Pickup Location:</strong> ' . esc_html($pickup_location) . '</p>';
-        echo '<p><strong>Branch Address:</strong> ' . esc_html($branch_address) . '</p>';
+        echo '<p><strong>' . __('Pickup Location', 'click-collect-branches') . ':</strong> ' . esc_html($pickup_location) . '</p>';
+        echo '<p><strong>' . __('Branch Address', 'click-collect-branches') . ':</strong> ' . esc_html($branch_address) . '</p>';
     }
 }
 
@@ -230,3 +230,4 @@ function plugin_enqueue_styles() {
     wp_enqueue_style('plugin-styles', plugin_dir_url(__FILE__) . 'css/style.css', array(), '1.0.0');
 }
 add_action('wp_enqueue_scripts', 'plugin_enqueue_styles');
+
