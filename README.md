@@ -59,7 +59,7 @@ Make sure to install and activate both the "Simple Click & Collect for WooCommer
 
 ## Contributing
 
-Contributions to the Click and Collect Branches plugin are welcome! If you have any bug reports, feature requests, or suggestions, please submit them through the [GitHub repository](https://github.com/your-repo/click-and-collect-branches).
+Contributions to the Click and Collect Branches plugin are welcome! If you have any bug reports, feature requests, or suggestions, please submit them through the [GitHub repository](https://github.com/kandekore/Simple-Click-and-Collect-Branches-for-WooCommerce).
 
 ## License
 
