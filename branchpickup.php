@@ -1,35 +1,24 @@
-<?php
-/*
-Plugin Name: Simple Click and Collect Branches for WooCommerce
-Description: Manage branches and enable pickup location selection for Click and Collect, should be used in conjunction with Simple click & Collect for WooCommerce.
-Version: 1.0
-Author: Darren Kandekore
-Author URI: https://darrenk.uk
-License: GPL v2 or later
-License URI:       https://www.gnu.org/licenses/gpl-2.0.html
-Update URI:        https://wordpresswizard.net/clickandcollectbranches
-*/
+<?php 
 
-// Add admin settings page
 add_action('admin_menu', 'click_collect_branches_add_custom_admin_menu');
 
 function click_collect_branches_add_custom_admin_menu() {
     add_menu_page(
-        __('Click & Collect Branches', 'click-collect-branches'), 
-        __('Click & Collect Branches', 'click-collect-branches'), 
-        'manage_options', 
-        'click-collect-branches', 
-        'click_collect_branches_display_main_menu_content', 
-        'dashicons-store', 
+        __('Click & Collect Branches', 'click-collect-branches'),
+        __('Click & Collect Branches', 'click-collect-branches'),
+        'manage_options',
+        'click-collect-branches',
+        'click_collect_branches_display_main_menu_content',
+        'dashicons-store',
         30
     );
-    
+
     add_submenu_page(
-        'click-collect-branches', 
-        __('Branches', 'click-collect-branches'), 
-        __('Branches', 'click-collect-branches'), 
-        'manage_options', 
-        'branches', 
+        'click-collect-branches',
+        __('Branches', 'click-collect-branches'),
+        __('Branches', 'click-collect-branches'),
+        'manage_options',
+        'branches',
         'click_collect_branches_display_branches_page'
     );
 }
@@ -48,10 +37,15 @@ function click_collect_branches_display_branches_page() {
     if (!current_user_can('manage_options')) {
         return;
     }
-    
+
     // Update branch information if form submitted
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         click_collect_branches_save_branch_information();
+    }
+
+    // Delete branch if requested
+    if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['branch_id'])) {
+        click_collect_branches_delete_branch($_GET['branch_id']);
     }
 
     // Fetch branch information from the database
@@ -87,6 +81,7 @@ function click_collect_branches_display_branches_page() {
                 <tr>
                     <th><?php _e('Branch Name', 'click-collect-branches'); ?></th>
                     <th><?php _e('Branch Address', 'click-collect-branches'); ?></th>
+                    <th><?php _e('Actions', 'click-collect-branches'); ?></th>
                 </tr>
                 </thead>
                 <tbody>
@@ -94,6 +89,13 @@ function click_collect_branches_display_branches_page() {
                     <tr>
                         <td><?php echo esc_html($branch['name']); ?></td>
                         <td><?php echo esc_html($branch['address']); ?></td>
+                        <td>
+                            <div class="row-actions">
+  <span class="delete">
+            <a href="<?php echo esc_url(wp_nonce_url(add_query_arg(array('action' => 'delete', 'branch_id' => $branch['id']), admin_url('admin.php?page=branches')), 'click_collect_branches_delete_branch')); ?>"
+               onclick="return confirm('<?php echo esc_js(__('Are you sure you want to delete this branch?', 'click-collect-branches')); ?>');"><?php _e('Delete', 'click-collect-branches'); ?></a>
+        </span></div>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
                 </tbody>
@@ -109,6 +111,7 @@ function click_collect_branches_save_branch_information() {
         $name = sanitize_text_field($_POST['branch_name']);
         $address = sanitize_textarea_field($_POST['branch_address']);
         $branch = array(
+            'id' => uniqid(),
             'name' => $name,
             'address' => $address,
         );
@@ -120,12 +123,27 @@ function click_collect_branches_save_branch_information() {
     }
 }
 
+// Delete a branch from the database
+function click_collect_branches_delete_branch($branch_id) {
+    $branches = click_collect_branches_get_all_branches();
+
+    // Find the branch by ID and remove it from the array
+    foreach ($branches as $key => $branch) {
+        if ($branch['id'] === $branch_id) {
+            unset($branches[$key]);
+            break;
+        }
+    }
+
+    // Update the branches in the database
+    update_option('click_collect_branches_branches', $branches);
+}
+
 // Retrieve all branches from the database
 function click_collect_branches_get_all_branches() {
     $branches = get_option('click_collect_branches_branches', array());
     return $branches;
 }
-
 // Display pickup locations on the checkout page
 add_action('woocommerce_before_order_notes', 'click_collect_branches_display_pickup_locations_checkout');
 
@@ -230,4 +248,3 @@ function plugin_enqueue_styles() {
     wp_enqueue_style('plugin-styles', plugin_dir_url(__FILE__) . 'css/style.css', array(), '1.0.0');
 }
 add_action('wp_enqueue_scripts', 'plugin_enqueue_styles');
-
